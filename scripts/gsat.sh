@@ -123,14 +123,14 @@ python run_gmt.py --dataset ogbg_molhiv --backbone PNA --cuda 0 -fs 1 -gmt 5 -di
 # Graph-SST2
 
 # GMT-lin
-python run_gmt.py --dataset ogbg_molhiv --backbone GIN --cuda 0 -fs 1 -mt 3 -ie 1
+python run_gmt.py --dataset Graph-SST2 --backbone GIN --cuda 0 -fs 1 -mt 3 -ie 1
 # GMT-sam 
-python run_gmt.py --dataset ogbg_molhiv --backbone GIN --cuda 0 -fs 1 -mt 5 -r 0.7 -st 100 -ie 1 -sm 
-python run_gmt.py --dataset ogbg_molhiv --backbone GIN --cuda 0 -fs 1 -gmt 5 -r 0.7 -st 100 -ie 1 -fm -mt 5669 
+python run_gmt.py --dataset Graph-SST2 --backbone GIN --cuda 0 -fs 1 -mt 5 -r 0.7 -st 100 -ie 1 -sm 
+python run_gmt.py --dataset Graph-SST2 --backbone GIN --cuda 0 -fs 1 -gmt 5 -r 0.7 -st 100 -ie 1 -fm -mt 5669 
 
 
 # GMT-lin 
-python run_gmt.py --dataset ogbg_molhiv --backbone PNA --cuda 0 -fs 1 -mt 3 -ie 0.1
+python run_gmt.py --dataset Graph-SST2 --backbone PNA --cuda 0 -fs 1 -mt 3 -ie 0.1
 # GMT-sam 
-python run_gmt.py --dataset ogbg_molhiv --backbone PNA --cuda 0 -fs 1 -mt 5 -di 20 -st 100 -ie 0.5 -sm 
-python run_gmt.py --dataset ogbg_molhiv --backbone PNA --cuda 0 -fs 1 -gmt 5 -di 20 -st 100 -ie 0.5 -fm -mt 5669
+python run_gmt.py --dataset Graph-SST2 --backbone PNA --cuda 0 -fs 1 -mt 5 -di 20 -st 100 -ie 0.5 -sm 
+python run_gmt.py --dataset Graph-SST2 --backbone PNA --cuda 0 -fs 1 -gmt 5 -di 20 -st 100 -ie 0.5 -fm -mt 5669
