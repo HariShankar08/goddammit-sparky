@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from models import GIN, PNA, SPMotifNet, SGC
+from models import GIN, PNA, SPMotifNet, SGC, RGCN
 from torch_geometric.nn import InstanceNorm
 
 
@@ -13,6 +13,11 @@ def get_model(x_dim, edge_attr_dim, num_class, multi_label, model_config, device
         model = SGC(x_dim, edge_attr_dim, num_class, multi_label, model_config)
     elif model_config['model_name'] == 'SPMotifNet':
         model = SPMotifNet(x_dim, edge_attr_dim, num_class, multi_label, model_config)
+    elif model_config['model_name'] == 'RGCN':
+        print('[INFO] Using RGCN model')
+        exit()
+        model = RGCN(x_dim, edge_attr_dim, num_class, multi_label, model_config
+                     
     else:
         raise ValueError('[ERROR] Unknown model name!')
     return model.to(device)
