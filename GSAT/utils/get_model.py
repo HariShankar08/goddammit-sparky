@@ -16,8 +16,7 @@ def get_model(x_dim, edge_attr_dim, num_class, multi_label, model_config, device
     elif model_config['model_name'] == 'RGCN':
         print('[INFO] Using RGCN model')
         exit()
-        model = RGCN(x_dim, edge_attr_dim, num_class, multi_label, model_config
-                     
+        model = RGCN(x_dim, edge_attr_dim, num_class, multi_label, model_config)
     else:
         raise ValueError('[ERROR] Unknown model name!')
     return model.to(device)

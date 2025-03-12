@@ -5,7 +5,7 @@ from torch_geometric.utils import degree
 from torch_geometric.loader import DataLoader
 
 from ogb.graphproppred import PygGraphPropPredDataset
-from datasets import SynGraphDataset, Mutag, SPMotif, MNIST75sp, graph_sst2, aminer
+from datasets import SynGraphDataset, Mutag, SPMotif, MNIST75sp, graph_sst2, AMiner
 
 
 def get_data_loaders(data_dir, dataset_name, batch_size, splits, random_state, mutag_x=False):
@@ -14,12 +14,16 @@ def get_data_loaders(data_dir, dataset_name, batch_size, splits, random_state, m
                             'spmotif_0.5', 'spmotif_0.7', 'spmotif_0.9','spmotif_0.33', 
                             'spmotif_0.50', 'spmotif_0.70', 'spmotif_0.90','spmotif_0.330', 
                             'ogbg_molhiv', 'ogbg_moltox21', 'ogbg_molbace',
-                            'ogbg_molbbbp', 'ogbg_molclintox', 'ogbg_molsider', 'aminer']
+                            'ogbg_molbbbp', 'ogbg_molclintox', 'ogbg_molsider', 'AMiner']
 
-    if dataset_name == 'aminer':
-        pass  
+    if dataset_name == 'AMiner':
+        dataset = AMiner(root=data_dir / 'AMiner')
+        split_idx = get_random_split_idx(dataset, splits)
+        loaders, test_set = get_loaders_and_test_set(batch_size, dataset=dataset, split_idx=split_idx)
+        train_set = dataset[split_idx["train"]]
 
-    if dataset_name == 'ba_2motifs':
+
+    elif dataset_name == 'ba_2motifs':
         dataset = SynGraphDataset(data_dir, 'ba_2motifs')
         split_idx = get_random_split_idx(dataset, splits)
         loaders, test_set = get_loaders_and_test_set(batch_size, dataset=dataset, split_idx=split_idx)
