@@ -1,0 +1,17 @@
+📌 Experiment: seed101112_method_otsu_s0.005_e0.001_m0.1
+Epoch 1: Loss=0.1552, Acc=1.0000
+Epoch 2: Loss=0.0101, Acc=1.0000
+Epoch 3: Loss=0.0065, Acc=1.0000
+Epoch 4: Loss=0.0058, Acc=1.0000
+Epoch 5: Loss=0.0059, Acc=1.0000
+Epoch 6: Loss=0.0056, Acc=1.0000
+Early stopping at epoch 6
+
+🔍 Final Evaluation:
+intersection: [(1, 2, 'cites'), (1, 4, 'cites'), (0, 1, 'writes'), (0, 4, 'writes'), (3, 4, 'cites')]
+precision: 0.7142857142857143
+recall: 1.0
+f1: 0.8333333284722222
+threshold: 0.005844120867550373
+num_pred_edges: 7
+num_true_edges: 5

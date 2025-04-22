@@ -1,0 +1,202 @@
+SEED IS 457
+Epoch 1: Loss=0.1037, Acc=1.0000
+Epoch 2: Loss=0.0000, Acc=1.0000
+Epoch 3: Loss=0.0000, Acc=1.0000
+Epoch 4: Loss=0.0000, Acc=1.0000
+Epoch 5: Loss=0.0000, Acc=1.0000
+Epoch 6: Loss=0.0000, Acc=1.0000
+Early stopping at epoch 6
+
+📦 Total class-0 graphs: 500
+
+🔍 Evaluating with otsu thresholding:
+  Graph 1/20: F1=1.0000, P=1.0000, R=1.0000
+Chosen threshold: 0.0000
+  Graph 2/20: F1=0.8000, P=0.6667, R=1.0000
+Chosen threshold: 0.0000
+  Graph 3/20: F1=0.0000, P=0.0000, R=0.0000
+Chosen threshold: 0.0000
+  Graph 4/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 5/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 6/20: F1=0.5714, P=0.4000, R=1.0000
+  Graph 7/20: F1=0.5000, P=0.5000, R=0.5000
+  Graph 8/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 9/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 10/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 11/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 12/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 13/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 14/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 15/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 16/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 17/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 18/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 19/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 20/20: F1=0.5714, P=0.4000, R=1.0000
+
+🔍 Evaluating with adaptive thresholding:
+  Graph 1/20: F1=1.0000, P=1.0000, R=1.0000
+Chosen threshold: 0.0000
+  Graph 2/20: F1=0.8000, P=0.6667, R=1.0000
+Chosen threshold: 0.0000
+  Graph 3/20: F1=0.0000, P=0.0000, R=0.0000
+Chosen threshold: 0.0000
+  Graph 4/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 5/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 6/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 7/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 8/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 9/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 10/20: F1=1.0000, P=1.0000, R=1.0000
+  Graph 11/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 12/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 13/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 14/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 15/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 16/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 17/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 18/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 19/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 20/20: F1=0.6667, P=0.5000, R=1.0000
+
+🔍 Evaluating with relative thresholding:
+  Graph 1/20: F1=0.0000, P=0.0000, R=0.0000
+Chosen threshold: 0.0000
+  Graph 2/20: F1=0.0000, P=0.0000, R=0.0000
+Chosen threshold: 0.0000
+  Graph 3/20: F1=0.0000, P=0.0000, R=0.0000
+Chosen threshold: 0.0000
+  Graph 4/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 5/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 6/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 7/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 8/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 9/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 10/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 11/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 12/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 13/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 14/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 15/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 16/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 17/20: F1=0.6667, P=1.0000, R=0.5000
+  Graph 18/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 19/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 20/20: F1=0.0000, P=0.0000, R=0.0000
+
+📊 Results Summary:
+OTSU Thresholding:
+  Precision: 0.4900
+  Recall:    0.8250
+  F1 Score:  0.6055
+ADAPTIVE Thresholding:
+  Precision: 0.4583
+  Recall:    0.7000
+  F1 Score:  0.5467
+RELATIVE Thresholding:
+  Precision: 0.0500
+  Recall:    0.0250
+  F1 Score:  0.0333
+
+🏆 Best method: otsu
+SEED IS 780
+Epoch 1: Loss=0.1082, Acc=1.0000
+Epoch 2: Loss=0.0000, Acc=1.0000
+Epoch 3: Loss=0.0000, Acc=1.0000
+Epoch 4: Loss=0.0000, Acc=1.0000
+Epoch 5: Loss=0.0000, Acc=1.0000
+Epoch 6: Loss=0.0000, Acc=1.0000
+Early stopping at epoch 6
+
+📦 Total class-0 graphs: 500
+
+🔍 Evaluating with otsu thresholding:
+  Graph 1/20: F1=0.0000, P=0.0000, R=0.0000
+Chosen threshold: 0.0001
+  Graph 2/20: F1=0.0000, P=0.0000, R=0.0000
+Chosen threshold: 0.0000
+  Graph 3/20: F1=0.8000, P=0.6667, R=1.0000
+Chosen threshold: 0.0000
+  Graph 4/20: F1=0.5000, P=0.5000, R=0.5000
+  Graph 5/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 6/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 7/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 8/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 9/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 10/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 11/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 12/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 13/20: F1=0.6667, P=0.5000, R=1.0000
+  Graph 14/20: F1=1.0000, P=1.0000, R=1.0000
+  Graph 15/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 16/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 17/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 18/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 19/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 20/20: F1=0.0000, P=0.0000, R=0.0000
+
+🔍 Evaluating with adaptive thresholding:
+  Graph 1/20: F1=0.0000, P=0.0000, R=0.0000
+Chosen threshold: 0.0001
+  Graph 2/20: F1=0.0000, P=0.0000, R=0.0000
+Chosen threshold: 0.0000
+  Graph 3/20: F1=1.0000, P=1.0000, R=1.0000
+Chosen threshold: 0.0000
+  Graph 4/20: F1=0.5000, P=0.5000, R=0.5000
+  Graph 5/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 6/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 7/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 8/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 9/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 10/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 11/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 12/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 13/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 14/20: F1=1.0000, P=1.0000, R=1.0000
+  Graph 15/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 16/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 17/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 18/20: F1=0.8000, P=0.6667, R=1.0000
+  Graph 19/20: F1=1.0000, P=1.0000, R=1.0000
+  Graph 20/20: F1=0.0000, P=0.0000, R=0.0000
+
+🔍 Evaluating with relative thresholding:
+  Graph 1/20: F1=0.0000, P=0.0000, R=0.0000
+Chosen threshold: 0.0001
+  Graph 2/20: F1=0.0000, P=0.0000, R=0.0000
+Chosen threshold: 0.0000
+  Graph 3/20: F1=0.0000, P=0.0000, R=0.0000
+Chosen threshold: 0.0001
+  Graph 4/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 5/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 6/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 7/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 8/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 9/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 10/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 11/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 12/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 13/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 14/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 15/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 16/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 17/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 18/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 19/20: F1=0.0000, P=0.0000, R=0.0000
+  Graph 20/20: F1=0.0000, P=0.0000, R=0.0000
+
+📊 Results Summary:
+OTSU Thresholding:
+  Precision: 0.3917
+  Recall:    0.5750
+  F1 Score:  0.4617
+ADAPTIVE Thresholding:
+  Precision: 0.4083
+  Recall:    0.5250
+  F1 Score:  0.4550
+RELATIVE Thresholding:
+  Precision: 0.0000
+  Recall:    0.0000
+  F1 Score:  0.0000
+
+🏆 Best method: otsu
