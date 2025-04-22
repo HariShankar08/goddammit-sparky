@@ -1,0 +1,46 @@
+test: correct = 11 total = 20
+Epoch 0: Loss=0.8597, Acc=0.5500
+test: correct = 20 total = 20
+Epoch 1: Loss=0.0367, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 2: Loss=0.0107, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 3: Loss=0.0049, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 4: Loss=0.0028, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 5: Loss=0.0017, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 6: Loss=0.0012, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 7: Loss=0.0009, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 8: Loss=0.0007, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 9: Loss=0.0005, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 10: Loss=0.0004, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 11: Loss=0.0003, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 12: Loss=0.0003, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 13: Loss=0.0002, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 14: Loss=0.0002, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 15: Loss=0.0002, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 16: Loss=0.0002, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 17: Loss=0.0001, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 18: Loss=0.0001, Acc=1.0000
+test: correct = 20 total = 20
+Epoch 19: Loss=0.0001, Acc=1.0000
+edge_accuracy: 0.720
+roc_auc: 0.617
+fidelity_pos: 1.000
+fidelity_neg: 1.000
+per_graph_hits: mean=0.720, per‑graph=[1.0, 0.5, 0.5, 0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.5, 1.0, 1.0, 0.8333333333333334, 0.5, 0.6666666666666666, 0.8333333333333334, 0.6666666666666666, 0.5, 0.6666666666666666, 1.0, 1.0, 0.6666666666666666, 0.16666666666666666, 0.8333333333333334, 0.8333333333333334, 1.0, 0.6666666666666666, 0.16666666666666666, 0.6666666666666666, 0.8333333333333334, 0.3333333333333333, 1.0, 0.6666666666666666, 0.8333333333333334, 0.8333333333333334, 0.5, 0.8333333333333334, 1.0, 0.6666666666666666, 0.8333333333333334, 0.8333333333333334, 0.5, 0.6666666666666666, 0.16666666666666666, 0.8333333333333334, 0.8333333333333334, 0.6666666666666666, 1.0, 1.0, 0.8333333333333334, 1.0, 0.5, 0.6666666666666666]
+evaluated_graphs: 50.000

@@ -1,0 +1,105 @@
+test: correct = 40 total = 40
+Epoch 0: Loss=0.5524, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 1: Loss=0.0096, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 2: Loss=0.0029, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 3: Loss=0.0014, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 4: Loss=0.0008, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 5: Loss=0.0005, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 6: Loss=0.0004, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 7: Loss=0.0003, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 8: Loss=0.0002, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 9: Loss=0.0002, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 10: Loss=0.0001, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 11: Loss=0.0001, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 12: Loss=0.0001, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 13: Loss=0.0001, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 14: Loss=0.0001, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 15: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 16: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 17: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 18: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 19: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 20: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 21: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 22: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 23: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 24: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 25: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 26: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 27: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 28: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 29: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 30: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 31: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 32: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 33: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 34: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 35: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 36: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 37: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 38: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 39: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 40: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 41: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 42: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 43: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 44: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 45: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 46: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 47: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 48: Loss=0.0000, Acc=1.0000
+test: correct = 40 total = 40
+Epoch 49: Loss=0.0000, Acc=1.0000
+edge_accuracy: 0.292
+roc_auc: 0.601
+fidelity_pos: 1.000
+fidelity_neg: 1.000
+per_graph_hits: mean=0.292, per‑graph=[0.8333333333333334, 0.5, 0.5, 0.6666666666666666, 0.3333333333333333, 0.8333333333333334, 0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.8333333333333334, 1.0, 0.5, 0.6666666666666666, 0.16666666666666666, 0.5, 0.3333333333333333, 0.5, 0.5, 0.5, 0.6666666666666666, 0.6666666666666666, 0.5, 0.5, 0.8333333333333334, 0.3333333333333333, 0.6666666666666666, 1.0, 0.8333333333333334, 0.6666666666666666, 0.16666666666666666, 0.6666666666666666, 0.16666666666666666, 0.5, 0.5, 0.6666666666666666, 0.5, 0.3333333333333333, 0.5, 0.5, 0.16666666666666666, 0.6666666666666666, 0.5, 0.5, 0.5, 0.6666666666666666, 0.5, 0.8333333333333334, 0.8333333333333334, 0.3333333333333333, 0.5, 0.3333333333333333, 0.6666666666666666, 0.6666666666666666, 0.8333333333333334, 0.8333333333333334, 0.8333333333333334, 0.6666666666666666, 0.8333333333333334, 0.5, 0.5, 0.5, 0.6666666666666666, 0.5, 0.5, 0.16666666666666666, 0.6666666666666666, 0.3333333333333333, 0.6666666666666666, 0.6666666666666666, 0.8333333333333334, 0.3333333333333333, 0.8333333333333334, 0.5, 0.8333333333333334, 0.6666666666666666, 0.6666666666666666, 0.3333333333333333, 0.0, 0.6666666666666666, 0.8333333333333334, 0.5, 0.6666666666666666, 0.6666666666666666, 0.8333333333333334, 0.6666666666666666, 0.5, 0.16666666666666666, 0.3333333333333333, 0.3333333333333333, 0.5, 0.6666666666666666, 0.8333333333333334, 0.5, 0.8333333333333334, 0.6666666666666666, 0.6666666666666666, 0.8333333333333334, 0.6666666666666666, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
