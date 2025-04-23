@@ -1,0 +1,1 @@
+{"epoch":19,"edge_accuracy_mean":0.085,"loss":3.4871579104281487,"per_graph_hits_mean":0.085,"fidelity_pos_mean":1,"_timestamp":1.745406323451794e+09,"auc":1,"_runtime":16.017321752,"evaluated_graphs_mean":100,"roc_auc_mean":0.3567526205450734,"_step":20,"fidelity_neg_mean":1,"_wandb":{"runtime":16},"acc":1}

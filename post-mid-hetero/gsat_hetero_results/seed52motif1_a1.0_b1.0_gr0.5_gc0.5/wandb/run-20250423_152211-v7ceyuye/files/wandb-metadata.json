@@ -1,0 +1,68 @@
+{
+  "os": "Linux-6.11.0-21-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.11.8",
+  "startedAt": "2025-04-23T09:52:11.899605Z",
+  "args": [
+    "--seed",
+    "52",
+    "--motif",
+    "1",
+    "--gamma_writes",
+    "0.5",
+    "--gamma_cites",
+    "0.5",
+    "--alpha",
+    "1",
+    "--beta",
+    "1",
+    "--hidden",
+    "128",
+    "--lr",
+    "1e-3",
+    "--temp",
+    "0.5",
+    "--epochs",
+    "20",
+    "--per_class",
+    "100",
+    "--out_dir",
+    "gsat_hetero_results"
+  ],
+  "program": "/home/vaishnavi-shivkumar/Documents/3-2/rsai/rsai-project/goddammit-sparky/post-mid-hetero/main_gsat_hetero.py",
+  "codePath": "post-mid-hetero/main_gsat_hetero.py",
+  "git": {
+    "remote": "https://github.com/HariShankar08/goddammit-sparky.git",
+    "commit": "221f1c2d4673f6e554fdfa61d371c3f8c1a4202f"
+  },
+  "email": "vaishnavishivkumar0@gmail.com",
+  "root": "gsat_hetero_results/seed52motif1_a1.0_b1.0_gr0.5_gc0.5",
+  "host": "vaishnavi-shivkumar-ROG-Zephyrus-G14-GA402NJ-GA402NJ",
+  "executable": "/home/vaishnavi-shivkumar/miniconda3/envs/precog/bin/python",
+  "codePathLocal": "main_gsat_hetero.py",
+  "cpu_count": 8,
+  "cpu_count_logical": 16,
+  "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "260852809728",
+      "used": "207075475456"
+    }
+  },
+  "memory": {
+    "total": "15964966912"
+  },
+  "cpu": {
+    "count": 8,
+    "countLogical": 16
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+      "memoryTotal": "6442450944",
+      "cudaCores": 2560,
+      "architecture": "Ampere"
+    }
+  ],
+  "cudaVersion": "12.2"
+}

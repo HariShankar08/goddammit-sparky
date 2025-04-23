@@ -1,0 +1,21 @@
+# Hyper-parameters
+seed: 512
+per_class: 100
+epochs: 20
+hidden: 128
+lr: 0.001
+alpha: 1.0
+beta: 20.0
+temp: 0.5
+gamma_writes: 0.3
+gamma_cites: 0.7
+out_dir: gsat_hetero_results
+motif: 0
+
+# Explanation metrics
+edge_accuracy: 0.482
+roc_auc: 0.497
+fidelity_pos: 1.000
+fidelity_neg: 1.000
+per_graph_hits: mean=0.482
+evaluated_graphs: 100.000

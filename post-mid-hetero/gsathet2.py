@@ -8,51 +8,68 @@ from sklearn.model_selection import train_test_split
 import networkx as nx
 import pickle
 from simple_motif import set_seed
-set_seed(52)
 
-def convert_to_hetero_data(G, mask=None):
+
+
+def convert_to_hetero_data(G):
+    """
+    G      – a NetworkX MultiDiGraph with node attr 'type' ∈ {'Author','Paper'}
+    mask   – optional set of (u,v) motif edges. If given, the function prints
+             and returns a boolean tensor aligned with the *writes* edges.
+    """
+    # print("\n==== Converting NetworkX graph to HeteroData ====")
     data = HeteroData()
 
-    authors = [n for n,d in G.nodes(data=True) if d['type']=='Author']
-    papers  = [n for n,d in G.nodes(data=True) if d['type']=='Paper']
+    # 1.  build node lists and ID maps ──────────────────────────────
+    authors = [n for n, d in G.nodes(data=True) if d["type"] == "Author"]
+    papers  = [n for n, d in G.nodes(data=True) if d["type"] == "Paper"]
     A, P    = len(authors), len(papers)
-    a_map   = {n:i for i,n in enumerate(authors)}
-    p_map   = {n:i for i,n in enumerate(papers)}
+    a_map   = {n: i for i, n in enumerate(authors)}
+    p_map   = {n: i for i, n in enumerate(papers)}
 
+    # print(f"Authors (|A|={A}):", authors)
+    # print(f"Papers  (|P|={P}):", papers)
+    # print("author-ID → row:", a_map)
+    # print("paper-ID  → row:", p_map)
+
+    # 2.  66-dim node features  (64-D one-hot  + degree + clustering coeff)
     def make_feats(nodes):
-        oh  = torch.eye(len(nodes), 64)
-        deg = torch.tensor([G.degree(n) for n in nodes]).float().view(-1,1)
-        # clustering on a simple graph (MultiGraph not supported)
-        cc  = torch.tensor([nx.clustering(nx.Graph(G), n) for n in nodes]).float().view(-1,1)
-        return torch.cat([oh, deg, cc], dim=1)          # 66‑D
+        oh  = torch.eye(len(nodes), 32)
+        deg = torch.tensor([G.degree(n) for n in nodes]).float().view(-1, 1)
+        cc  = torch.tensor([nx.clustering(nx.Graph(G), n) for n in nodes]).float().view(-1, 1)
+        return torch.cat([oh, deg, cc], dim=1)
 
-    data['author'].x = make_feats(authors)
-    data['paper' ].x = make_feats(papers)
+    data["author"].x = make_feats(authors)
+    data["paper" ].x = make_feats(papers)
+    # print("author.x shape :", tuple(data['author'].x.shape))
+    # print("paper.x  shape :", tuple(data['paper' ].x.shape))
 
-    # writes ----------------------------------------------------------------
-    writes = [(u,v) for u,v,d in G.edges(data=True) if d['type']=='writes']
-    if writes:
-        src = [a_map[u] for u,v in writes]
-        dst = [p_map[v] for u,v in writes]
-        data['author','writes','paper'].edge_index = torch.tensor([src,dst])
-    else:
-        data['author','writes','paper'].edge_index = torch.empty((2,0), dtype=torch.long)
+    # 3.  writes  (Author → Paper) ─────────────────────────────────
+    writes = [(u, v) for u, v, d in G.edges(data=True) if d["type"] == "writes"]
+    src_w  = [a_map[u] for u, v in writes]
+    dst_w  = [p_map[v] for u, v in writes]
+    data["author", "writes", "paper"].edge_index = torch.tensor([src_w, dst_w])
+    # print("\nwrites edges           :", writes)
+    # print("writes edge_index      :\n", data["author","writes","paper"].edge_index)
 
-    # cites -----------------------------------------------------------------
-    cites = [(u,v) for u,v,d in G.edges(data=True) if d['type']=='cites']
-    valid = [(u,v) for u,v in cites if u in p_map and v in p_map]
-    if valid:
-        src = [p_map[u] for u,v in valid]
-        dst = [p_map[v] for u,v in valid]
-        data['paper','cites','paper'].edge_index = torch.tensor([src,dst])
-    else:
-        data['paper','cites','paper'].edge_index = torch.empty((2,0), dtype=torch.long)
 
-    # self‑loops ------------------------------------------------------------
-    for ntype, N in [('author',A), ('paper',P)]:
+    # 4.  cites   (Paper  → Paper) ─────────────────────────────────
+    cites = [(u, v) for u, v, d in G.edges(data=True) if d["type"] == "cites"
+             and u in p_map and v in p_map]
+    src_c  = [p_map[u] for u, v in cites]
+    dst_c  = [p_map[v] for u, v in cites]
+    data["paper", "cites", "paper"].edge_index = torch.tensor([src_c, dst_c])
+    # print("\ncites edges            :", cites)
+    # print("cites edge_index       :\n", data["paper","cites","paper"].edge_index)
+
+    # 5.  explicit self-loops ──────────────────────────────────────
+    for ntype, N in [("author", A), ("paper", P)]:
         idx = torch.arange(N)
-        data[ntype,'self_loop',ntype].edge_index = torch.stack([idx,idx])
+        data[ntype, "self_loop", ntype].edge_index = torch.stack([idx, idx])
+    # print("\nself-loops added for every node.")
 
+    # print("Current keys in HeteroData:", list(data.keys()))
+    # print("==== conversion complete ====\n")
     return data
 class MLP(nn.Module):
     def __init__(self, dims):
@@ -219,16 +236,30 @@ class GSATTrainer:
 
     def test(self, loader):
         self.model.eval()
+
         correct = tot = 0
+        y_true, y_score = [], []
+
         with torch.no_grad():
             for data in loader:
-                me, _ = self.sample_edges(data, train=False)
-                logits, _ = self.model(data.x_dict, me)
-                preds = logits.argmax(dim=-1)
-                correct += (preds==data.y).sum().item()
-                tot += data.y.size(0)
-        print("test: correct =", correct, "total =", tot)
-        return correct/tot if tot else 0.0
+                masked_edges, _ = self.sample_edges(data, train=False)
+                logits, _ = self.model(data.x_dict, masked_edges)   # shape (B, 2)
+
+                probs  = torch.softmax(logits, dim=-1)              # (B, 2)
+                preds  = logits.argmax(dim=-1)
+                correct += (preds == data.y).sum().item()
+                tot     += data.y.size(0)
+                y_true.extend(data.y.cpu().numpy())
+                y_score.extend(probs[:, 1].cpu().numpy())           # P(class=1)
+
+        acc = correct / tot if tot else 0.0
+        try:
+            auc = roc_auc_score(y_true, y_score)
+        except ValueError:              # all labels identical in this split
+            auc = float('nan')
+
+        print(f"test: correct={correct} total={tot}  acc={acc:.3f}  roc_auc={auc:.3f}")
+        return acc, auc
 
 
 # want to visualize the explanations 
@@ -237,13 +268,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-import matplotlib.pyplot as plt
-import networkx as nx
-import numpy as np
-
-import matplotlib.pyplot as plt
-import networkx as nx
-import numpy as np
 
 def visualize_explanation_topk(graph, trainer, convert_to_hetero_data,
                                 mask_edges, top_k = {'writes': 2, 'cites': 4}):
@@ -271,7 +295,7 @@ def visualize_explanation_topk(graph, trainer, convert_to_hetero_data,
             continue
 
         # get indices of top_k scores
-        idxs = np.argsort(scores)[-top_k[rel[1]]:]
+        idxs = np.argsort(scores)[::-1][:top_k[rel[1]]]
         ei = data.edge_index_dict[rel]
         authors = [n for n,d in graph.nodes(data=True) if d['type']=='Author']
         papers  = [n for n,d in graph.nodes(data=True) if d['type']=='Paper']
@@ -307,7 +331,8 @@ def visualize_explanation_topk(graph, trainer, convert_to_hetero_data,
     plt.title(f"GSAT Explanation (top {top_k} edges)")
     plt.legend()
     plt.axis('off')
-    plt.show()
+    # plt.show()
+    return plt.gcf()
 
 
 from sklearn.metrics import roc_auc_score
@@ -326,12 +351,12 @@ def evaluate_explanations2(
 
     for G, gt_mask, y in zip(graphs, masks, labels):
         data = convert_fn(G)
-        _, α = trainer.sample_edges(data, train=False)
+        _, alph = trainer.sample_edges(data, train=False)
 
         # ---------- ROC bookkeeping (all graphs, all edges) ---------------
         authors = [n for n,d in G.nodes(data=True) if d['type']=='Author']
         papers  = [n for n,d in G.nodes(data=True) if d['type']=='Paper']
-        for rel, probs in α.items():
+        for rel, probs in alph.items():
             ei   = data.edge_index_dict[rel]
             srcL = authors if rel[0]=='author' else papers
             dstL = papers
@@ -346,7 +371,7 @@ def evaluate_explanations2(
 
         # ---------- build top‑k masks & pred edge list --------------------
         topk_bool, pred_edges = {}, []
-        for rel, probs in α.items():
+        for rel, probs in alph.items():
             rtype = rel[1]; k = top_k.get(rtype, 0)
             m = torch.zeros_like(probs, dtype=torch.bool)
             if k > 0 and probs.numel():
@@ -400,9 +425,36 @@ def evaluate_explanations2(
 # -----------------------------------------
 # 4) Example usage (unchanged)
 # -----------------------------------------
+import argparse
 if __name__ == "__main__":
-    from trapezoid_motif import generate_simple_dataset_with_noise
-    generate_simple_dataset_with_noise("hit.pkl",50)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--per_class", type=int, default=50)
+    parser.add_argument("--epochs", type=int, default=20)
+    parser.add_argument("--hidden", type=int, default=128)
+    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--gamma_writes", type=float, default=0.5)
+    parser.add_argument("--gamma_cites", type=float, default=0.5)
+    parser.add_argument("--alpha", type=float, default=0.0001)
+    parser.add_argument("--beta", type=float, default=20.0)
+    parser.add_argument("--temp", type=float, default=0.5)
+    parser.add_argument("--img_dir", type=str, default="gsat_hetero_explanations")
+    parser.add_argument("--motif", type=int, default=0)
+
+    args = parser.parse_args()
+    if args.motif == 0:
+        from trapezoid_motif import generate_simple_dataset_with_noise
+        filename = "trapezoid_motif_gsat.pkl"
+        top_k = {'writes': 2, 'cites': 4}
+    elif args.motif == 1:
+        from simple_motif import generate_simple_dataset_with_noise
+        filename = "simple_motif_gsat.pkl"
+        top_k = {'writes': 2, 'cites': 0}
+    else: 
+        raise ValueError("motif must be 0 or 1")
+        
+    set_seed(61)
+    generate_simple_dataset_with_noise("hit.pkl",100)
     with open("hit.pkl","rb") as f:
         graphs, labels, masks = pickle.load(f)
 
@@ -430,17 +482,18 @@ if __name__ == "__main__":
     from tqdm import tqdm
     for epoch in tqdm(range(20)):
         loss = trainer.train_epoch(train_loader)
-        acc  = trainer.test(test_loader)
-        print(f"Epoch {epoch}: Loss={loss:.4f}, Acc={acc:.4f}")
-    
-    visualize_explanation_topk(graphs[0], trainer, convert_to_hetero_data,mask_edges=masks[0])
-    visualize_explanation_topk(graphs[1], trainer, convert_to_hetero_data, mask_edges=masks[1])
-    visualize_explanation_topk(graphs[2], trainer, convert_to_hetero_data,mask_edges=masks[2])
-    visualize_explanation_topk(graphs[3], trainer, convert_to_hetero_data, mask_edges=masks[3])
+        acc,auc  = trainer.test(test_loader)
+        print(f"Epoch {epoch}: Loss={loss:.4f}, Acc={acc:.4f}, ROC AUC={auc:.4f}")
+    # fig = visualize_explanation_topk(graphs[0], trainer, convert_to_hetero_data,mask_edges=masks[0], top_k=topk
+    # fig.savefig(os.path.join(img_dir, f"graph_{i+1}.png"))
+    # plt.close(fig)
+    # visualize_explanation_topk(graphs[1], trainer, convert_to_hetero_data, mask_edges=masks[1])
+    # visualize_explanation_topk(graphs[2], trainer, convert_to_hetero_data,mask_edges=masks[2])
+    # visualize_explanation_topk(graphs[3], trainer, convert_to_hetero_data, mask_edges=masks[3])
 
     metrics = evaluate_explanations2(
             graphs, masks, labels, trainer, convert_to_hetero_data,
-            top_k={'writes':2, 'cites':4}, motif_class=0)
+            top_k=top_k, motif_class = 0) 
 
     for k, v in metrics.items():
         if isinstance(v, list):
