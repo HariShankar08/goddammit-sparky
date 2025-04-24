@@ -67,7 +67,7 @@ def contains_simple_motif(G):
    
 
 # ----- add noise -------- 
-def add_random_noise(G, num_extra_authors=4, num_extra_papers=5, max_writes=3, max_cites=3, motif_checkers=[]):
+def add_random_noise(G, num_extra_authors=1, num_extra_papers=3, max_writes=2, max_cites=3, motif_checkers=[]):
     offset = max(G.nodes) + 1 if G.nodes else 0
     authors, papers = add_nodes(G, num_extra_authors, num_extra_papers, offset)
 

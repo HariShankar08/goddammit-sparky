@@ -1,25 +1,20 @@
-# utils_wandb.py
-import wandb, os, json, numpy as np
+import wandb, numpy as np, os, pandas as pd
 
 def start_run(args, run_dir):
-    """
-    Creates/returns a wandb run: the run-name is the same tag used
-    for the local folder.  All args are stored in the config.
-    """
-    wandb.init(
-        project="gsat_hetero",
-        name=os.path.basename(run_dir),   # tag
-        dir=run_dir,                      # wandb stores .wandb file here
-        config=vars(args),
-        reinit=True
-    )
-    return wandb.run
+    return wandb.init(project="gsat_hetero5_seed7_motif1",
+                      name=os.path.basename(run_dir),
+                      dir=run_dir,
+                      config=vars(args), reinit=True)
 
 def log_epoch(epoch, loss, acc, auc):
-    wandb.log({"epoch": epoch, "loss": loss, "acc": acc, "auc": auc})
+    wandb.log({"epoch":epoch, "loss":loss, "acc":acc, "auc":auc})
 
-def log_final(metrics: dict):
-    # flatten lists
-    flat = {f"{k}_mean": np.mean(v) if isinstance(v, list) else v
-            for k, v in metrics.items()}
+def log_history(loss_h, acc_h, auc_h):
+    df = pd.DataFrame({"epoch":range(len(loss_h)),
+                       "loss":loss_h, "acc":acc_h, "auc":auc_h})
+    wandb.log({"history": wandb.Table(dataframe=df)})
+
+def log_final(metrics:dict):
+    flat = {k:(np.mean(v) if isinstance(v,list) else v)
+            for k,v in metrics.items()}
     wandb.log(flat)

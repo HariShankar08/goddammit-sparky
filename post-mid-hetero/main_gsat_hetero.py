@@ -23,7 +23,7 @@ from gsathet2 import (
     convert_to_hetero_data,  GSAT_HeteroGNN, GSATTrainer,
     visualize_explanation_topk, evaluate_explanations2
 )
-from utils_wandb import start_run, log_epoch, log_final
+from utils_wandb import start_run, log_epoch, log_history, log_final
 
 # ─────────────────────────────────────────────────────────────────────────────
 def choose_motif(motif_id: int):
@@ -33,11 +33,36 @@ def choose_motif(motif_id: int):
              motif_label)            # int label that means “motif present”
     """
     if motif_id == 0:   # trapezoid
-        return motif0.generate_simple_dataset_with_noise, {'writes':2,'cites':4}, 0
+        return motif0.generate_simple_dataset_with_noise, {'writes':0.5,'cites':0.5}, 0
     elif motif_id == 1: # simple 3-edge motif
-        return motif1.generate_simple_dataset_with_noise, {'writes':2,'cites':0}, 0
+        return motif1.generate_simple_dataset_with_noise, {'writes':0.5,'cites':0}, 0
     else:
         raise ValueError("motif must be 0 or 1")
+# ---------- helper: did_GSAT_hit_all_edges? -------------------------------
+def gsat_full_hit(graph, mask_edges, trainer, ratio):
+    """
+    Returns True iff *all* edges kept by sparse_topk belong to mask_edges.
+    """
+    from gsathet2 import sparse_topk, convert_to_hetero_data
+    data = convert_to_hetero_data(graph)
+    _, alpha = trainer.sample_edges(data, train=False)
+
+    authors = [n for n,d in graph.nodes(data=True) if d['type']=='Author']
+    papers  = [n for n,d in graph.nodes(data=True) if d['type']=='Paper']
+
+    for rel, probs in alpha.items():
+        rtype = rel[1]
+        if rtype not in ratio or probs.numel()==0:
+            continue
+        keep = sparse_topk(probs, data.edge_index_dict[rel], ratio=ratio[rtype])
+        ei   = data.edge_index_dict[rel][:, keep]
+        srcL = authors if rel[0]=='author' else papers
+        dstL = papers
+        for i in range(ei.size(1)):
+            edge = (srcL[ei[0,i]], dstL[ei[1,i]])
+            if edge not in mask_edges and (edge[1],edge[0]) not in mask_edges:
+                return False        # found a wrong edge
+    return True                     # every kept edge is correct
 
 # ─────────────────────────────────────────────────────────────────────────────
 def main() -> None:
@@ -69,7 +94,7 @@ def main() -> None:
 
 
     # 2.  choose dataset generator / vis settings
-    gen_fn, top_k, motif_label = choose_motif(args.motif)
+    gen_fn, ratio, motif_label = choose_motif(args.motif)
 
     # 3.  cache dataset to run-specific folder
     ds_file = os.path.join(run_dir, "dataset.pkl")
@@ -106,46 +131,42 @@ def main() -> None:
     )
 
     # 6.  training
+    loss_h, acc_h, auc_h = [], [], []
     for epoch in range(args.epochs):
         loss = trainer.train_epoch(train_loader)
         acc,auc  = trainer.test(test_loader)
         print(f"[{tag}] epoch {epoch:02d}: loss={loss:.4f} acc={acc:.3f} auc={auc:.3f}")
+        loss_h.append(loss)
+        acc_h.append(acc)
+        auc_h.append(auc)
         log_epoch(epoch, loss, acc, auc)
+
+    log_history(loss_h, acc_h, auc_h)
 
     # 7.  save explanations for first 4 graphs
     import matplotlib.pyplot as plt
     import random
     random.seed(args.seed)
-    rand_ids = random.sample(range(len(graphs)), k=min(4, len(graphs)//2))
-
-    for i in rand_ids:
-        fig = visualize_explanation_topk(
-            graphs[i], trainer, convert_to_hetero_data,
-            mask_edges=masks[i], top_k=top_k
-        )
-        fig.savefig(os.path.join(run_dir, f"graph_{i}.png"))
-        plt.close(fig)
+    # 7.  visualise only perfect-recall explanations
 
     # 8.  quantitative metrics
-    metrics = evaluate_explanations2(
-        graphs, masks, labels, trainer, convert_to_hetero_data,
-        top_k=top_k, motif_class=motif_label
-    )
-
+    metrics = evaluate_explanations2(graphs,masks,labels,trainer,
+                                     ratio=ratio, motif_class=motif_label)
+    perfect = metrics['full_mask_covered_ids']
+    import matplotlib.pyplot as plt
+    for idx in perfect[:4]:                     # save up to 4 examples
+        fig = visualize_explanation_topk(
+                graphs[idx], trainer,
+                ratio=ratio, mask_edges=masks[idx])
+        fig.savefig(os.path.join(run_dir, f"graph_{idx}.png"))
+        plt.close(fig)
     # 9.  persist hyper-parameters & metrics
-    with open(os.path.join(run_dir, "metrics.txt"), "w") as fp:
-        fp.write("# Hyper-parameters\n")
-        for k, v in vars(args).items():
+    with open(os.path.join(run_dir,"metrics.txt"),'w') as fp:
+        for k,v in metrics.items():
             fp.write(f"{k}: {v}\n")
-        fp.write("\n# Explanation metrics\n")
-        for k, v in metrics.items():
-            val = (f"mean={np.mean(v):.3f}" if isinstance(v, list)
-                   else f"{v:.3f}")
-            fp.write(f"{k}: {val}\n")
-
-    print(f"★ finished run {tag} | ROC-AUC = {metrics['roc_auc']:.3f}")
-    log_final(metrics) 
-    run.finish()
+    print("★ finished | graph ROC-AUC =", metrics['graph_roc_auc'],
+          "| edge ROC-AUC =", metrics['edge_roc_auc'])
+    log_final(metrics); run.finish()
 
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":

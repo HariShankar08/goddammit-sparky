@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Grid-search over (gamma_writes × gamma_cites × alpha × beta × motif × seed)
 
-OUT=gsat_hetero_results
+OUT=gsat_hetero_results4_seed7_motif1
 mkdir -p "$OUT"
 
 # ── swept hyper-parameters ────────────────────────────────────────────────
-gw_arr=(0.3 0.5 0.7)      # gamma_writes
-gc_arr=(0.3 0.5 0.7)      # gamma_cites
-alpha_arr=(1e-4 1)        # alpha values
-beta_arr=(20 1)           # beta  values
-motifs=(0 1)              # 0 = trapezoid, 1 = simple motif
-seeds=(52 234 512 59 7)    # five seeds
+gw_arr=(0.3 0.5 0.7 0.9)      # gamma_writes
+gc_arr=(0.3 0.5 0.7 0.9)      # gamma_cites
+alpha_arr=(1e-4)        # alpha values
+beta_arr=(20)           # beta  values
+motifs=(1)              # 0 = trapezoid, 1 = simple motif
+seeds=(7)    # five seeds
 
 # ── fixed hyper-parameters ────────────────────────────────────────────────
 HIDDEN=128

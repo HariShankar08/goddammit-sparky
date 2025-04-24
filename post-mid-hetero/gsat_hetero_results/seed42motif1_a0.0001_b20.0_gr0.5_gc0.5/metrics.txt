@@ -1,0 +1,6 @@
+edge_accuracy: 0.2214166666666667
+edge_roc_auc: 0.4807058773712737
+graph_roc_auc: 1.0
+fidelity_pos: 1.0
+fidelity_neg: 1.0
+full_mask_covered_ids: [5, 9, 25, 27, 31, 34, 40, 41, 48, 49, 58, 60, 63, 65, 66, 70, 72, 84, 88, 89, 99]

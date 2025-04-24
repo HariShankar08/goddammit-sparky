@@ -44,7 +44,7 @@ def generate_trapezoid_motif_graph():
 
     motif_edges = {
         (a, p1), (a, p4),
-        (p1, p2), (p3, p4), (p1, p4)
+        (p1, p2), (p2, p3) , (p3, p4), (p1, p4), 
     }
 
     for u, v in motif_edges:
@@ -54,23 +54,43 @@ def generate_trapezoid_motif_graph():
     G.graph['motif_mask'] = motif_edges
     return G
 def contains_trapezoid_motif(G):
-    authors = [n for n, d in G.nodes(data=True) if d['type'] == 'Author']
-    for a in authors:
-        written = [v for u, v, d in G.out_edges(a, data=True) if d['type'] == 'writes']
+    """
+    Return True iff the graph contains a trapezoid motif:
+
+       a ─writes─► p1 ─cites─► p2 ─cites─► p3 ─cites─► p4
+       a ─writes─► p4
+       p1 ─cites──────────────────────────► p4      (diagonal)
+
+    where a is an Author and all p* are Papers.
+    """
+    # iterate over every author
+    for a in (n for n,d in G.nodes(data=True) if d['type']=='Author'):
+        # papers written by this author
+        written = [v for _,v,d in G.out_edges(a,data=True) if d['type']=='writes']
         if len(written) < 2:
             continue
+
+        # choose ordered pair (p1, p4) of DISTINCT written papers
         for p1 in written:
             for p4 in written:
                 if p1 == p4:
                     continue
-                if G.has_edge(p1, p4) and any(
-                    G.has_edge(p1, p2) and G.has_edge(p3, p4)
-                    for p2 in G.successors(p1)
-                    for p3 in G.predecessors(p4)
-                ):
-                    return True
-    return False
+                # diagonal must exist
+                if not G.has_edge(p1, p4):
+                    continue
 
+                # search for intermediate p2, p3 such that
+                # p1→p2→p3→p4 forms a citation chain
+                for p2 in G.successors(p1):
+                    if p2 in {p1, p4} or not G.has_edge(p1, p2):
+                        continue
+                    for p3 in G.successors(p2):
+                        cond = (p3 not in {p1, p2, p4}
+                                and G.has_edge(p2, p3)
+                                and G.has_edge(p3, p4))
+                        if cond:
+                            return True
+    return False
 
 def add_random_noise(G, num_extra_authors=1, num_extra_papers=2, max_writes=2, max_cites=3, motif_checkers=[]):
     offset = max(G.nodes) + 1 if G.nodes else 0
@@ -100,14 +120,14 @@ def add_random_noise(G, num_extra_authors=1, num_extra_papers=2, max_writes=2, m
 def generate_random_non_motif_graph():
     while True:
         G = nx.MultiDiGraph()
-        authors, papers = add_nodes(G, 2, 3)
+        authors, papers = add_nodes(G, 2, 6)
         G.graph['motif_mask'] = set()
         for a in authors:
-            for p in random.sample(papers, random.randint(1, 3)):
+            for p in random.sample(papers, random.randint(1, 5)):
                 G.add_edge(a, p, type='writes')
         for i in range(len(papers)):
             for j in range(len(papers)):
-                if i != j and random.random() < 0.3:
+                if i != j and random.random() < 0.4:
                     G.add_edge(papers[i], papers[j], type='cites')
         # if not contains_trapezoid_motif(G):
         if not contains_trapezoid_motif(G):

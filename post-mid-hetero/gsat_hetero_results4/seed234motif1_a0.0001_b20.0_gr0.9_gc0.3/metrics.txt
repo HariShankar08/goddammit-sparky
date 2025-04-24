@@ -1,0 +1,6 @@
+edge_accuracy: 0.05152380952380953
+edge_roc_auc: 0.7766300980898296
+graph_roc_auc: 1.0
+fidelity_pos: 1.0
+fidelity_neg: 1.0
+full_mask_covered_ids: []

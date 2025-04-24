@@ -7,9 +7,41 @@ from torch_geometric.loader import DataLoader
 from sklearn.model_selection import train_test_split
 import networkx as nx
 import pickle
-from simple_motif import set_seed
+import numpy as np 
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_auc_score
 
+def set_seed(seed: int = 42):
+    torch.manual_seed(seed)
+    np.random.seed(seed)
 
+# ── sparse node-wise top-k (≈ GSAT paper) ───────────────────────────────────
+def sparse_topk(scores: torch.Tensor,
+                edge_index: torch.Tensor,
+                ratio: float = 0.5,
+                dim: int = 0):
+    """
+    Per-source-node top-k with a safeguard:
+      – if out-degree d ≤ 2  → keep all d edges
+      – else                  keep ceil(ratio·d) edges
+    """
+    src = edge_index[dim]
+    deg = torch.bincount(src, minlength=src.max()+1)
+
+    quota = torch.where(deg <= 2,
+                        deg,                             # keep all
+                        torch.ceil(ratio * deg.float()).long())
+
+    order   = torch.argsort(scores, descending=True)
+    src_ord = src[order]
+
+    rank = torch.zeros_like(order)
+    rank[1:] = (src_ord[1:] == src_ord[:-1]).cumsum(0) + 1
+    keep = rank < quota[src_ord]
+
+    mask = torch.zeros_like(scores, dtype=torch.bool)
+    mask[order[keep]] = True
+    return mask
 
 def convert_to_hetero_data(G):
     """
@@ -165,7 +197,8 @@ class GSATTrainer:
 
             s = self.model.edge_mlps['_'.join(rel)](torch.cat([h_src,h_dst],-1)).view(-1)
             # print(f"{rel} s (logit input) shape:", s.shape)
-            logits = torch.log(torch.sigmoid(s)+1e-10)
+            # logits = torch.log(torch.sigmoid(s)+1e-10)
+            logits = s
             # print(f"{rel} logits shape:", logits.shape)
 
             if train:
@@ -263,162 +296,308 @@ class GSATTrainer:
 
 
 # want to visualize the explanations 
-from skimage.filters import threshold_otsu
-import matplotlib.pyplot as plt
-import networkx as nx
-import numpy as np
+def visualize_explanation_topk(G, trainer, ratio={'writes':0.4,'cites':0.4},
+                               mask_edges=None):
+    """Draws GSAT top-r edges per relation and the ground-truth motif."""
+    data = convert_to_hetero_data(G)
+    _, alph = trainer.sample_edges(data, train=False)
 
+    H = nx.Graph(G)
+    pos = nx.spring_layout(H, seed=42)   # stable layout
 
-def visualize_explanation_topk(graph, trainer, convert_to_hetero_data,
-                                mask_edges, top_k = {'writes': 2, 'cites': 4}):
-    """
-    Like visualize_explanation, but selects exactly `top_k` edges
-    per relation (writes/cites), ranked by attention score.
-    """
-    data = convert_to_hetero_data(graph)
-    _, alpha_dict = trainer.sample_edges(data, train=False)
+    authors = [n for n,d in G.nodes(data=True) if d['type']=='Author']
+    papers  = [n for n,d in G.nodes(data=True) if d['type']=='Paper']
 
-    H = nx.Graph()
-    H.add_nodes_from(graph.nodes(data=True))
-    H.add_edges_from(graph.edges(data=True))
-    pos = nx.spring_layout(H)
-
-    # collect the top_k edges
     gsat_edges = []
-    for rel, alpha in alpha_dict.items():
-        if rel[1] not in {'writes','cites'}:
-            continue
-        scores = alpha.cpu().detach().numpy()
-        if scores.size == 0:
-            continue
-        if top_k[rel[1]] == 0:
-            continue
+    for rel, prob in alph.items():
+        rtype = rel[1]
+        if rtype not in ratio or prob.numel()==0: continue
+        keep = sparse_topk(prob, data.edge_index_dict[rel], ratio=ratio[rtype])
+        ei   = data.edge_index_dict[rel][:, keep]
 
-        # get indices of top_k scores
-        idxs = np.argsort(scores)[::-1][:top_k[rel[1]]]
-        ei = data.edge_index_dict[rel]
-        authors = [n for n,d in graph.nodes(data=True) if d['type']=='Author']
-        papers  = [n for n,d in graph.nodes(data=True) if d['type']=='Paper']
-        src_list = authors if rel[0]=='author' else papers
-        dst_list = papers
+        srcL = authors if rel[0] == 'author' else papers
+        dstL = papers
+        gsat_edges.extend([(srcL[ei[0,i]], dstL[ei[1,i]])
+                           for i in range(ei.size(1))])
 
-        for idx in idxs:
-            u = src_list[ ei[0,idx].item() ]
-            v = dst_list[ ei[1,idx].item() ]
-            gsat_edges.append((u, v))
-
-    # plot
+    import matplotlib.pyplot as plt
     plt.figure(figsize=(6,4))
-    authors = [n for n,d in graph.nodes(data=True) if d['type']=='Author']
-    papers  = [n for n,d in graph.nodes(data=True) if d['type']=='Paper']
-
-    nx.draw_networkx_nodes(H, pos, nodelist=authors,
-                           node_color='skyblue', node_shape='o', label='Author')
-    nx.draw_networkx_nodes(H, pos, nodelist=papers,
-                           node_color='lightgreen', node_shape='s', label='Paper')
+    nx.draw_networkx_nodes(H, pos, nodelist=authors, node_color='skyblue',
+                           node_shape='o', label='Author')
+    nx.draw_networkx_nodes(H, pos, nodelist=papers,  node_color='lightgreen',
+                           node_shape='s', label='Paper')
     nx.draw_networkx_labels(H, pos, font_size=8)
     nx.draw_networkx_edges(H, pos, edge_color='lightgrey', width=1)
 
     if gsat_edges:
-        nx.draw_networkx_edges(H, pos,
-            edgelist=gsat_edges, edge_color='red', width=2, label='GSAT top-k')
+        nx.draw_networkx_edges(H, pos, edgelist=gsat_edges,
+                               edge_color='red', width=2, label='GSAT top-r')
 
     if mask_edges:
-        nx.draw_networkx_edges(H, pos,
-            edgelist=mask_edges, edge_color='black',
-            style='dashed', width=2, label='Motif (GT)')
+        nx.draw_networkx_edges(H, pos, edgelist=mask_edges,
+                               edge_color='black', style='dashed',
+                               width=2, label='Motif (GT)')
 
-    plt.title(f"GSAT Explanation (top {top_k} edges)")
-    plt.legend()
-    plt.axis('off')
-    # plt.show()
+    plt.title(f"GSAT Explanation (ratio {ratio})")
+    plt.axis('off'); plt.legend()
     return plt.gcf()
 
-
-from sklearn.metrics import roc_auc_score
-import torch, numpy as np
-
+# ─────────────────────────────────────────────────────────────────────────────
 @torch.no_grad()
 def evaluate_explanations2(
         graphs, masks, labels,
-        trainer, convert_fn,
-        top_k={'writes':2, 'cites':4},
-        motif_class=0                 # which label corresponds to “motif present”
-):
-    hits_per_graph, fid_pos, fid_neg = [], [], []
-    y_true, y_score                   = [], []   # <- now filled for *all* graphs
+        trainer,                      # trained GSATTrainer
+        ratio,                        # {'writes':r₁, 'cites':r₂, ...}
+        motif_class = 0):
+    """
+    Computes standard explanation metrics AND collects the indices of all
+    graphs where the predicted sparse-top-k subgraph covers *every* edge in
+    the ground-truth mask (100 % recall).
+
+    Returns dict with keys
+      edge_accuracy, edge_roc_auc, graph_roc_auc,
+      fidelity_pos, fidelity_neg,
+      full_mask_covered_ids   ← NEW
+    """
+    hits, fid_pos, fid_neg = [], [], []
+    edge_y, edge_s = [], []
+    graph_y, graph_s = [], []
+    full_mask_covered_ids = []
+
+    from gsathet2 import sparse_topk, convert_to_hetero_data
     rels = trainer.model.relations
 
-    for G, gt_mask, y in zip(graphs, masks, labels):
-        data = convert_fn(G)
-        _, alph = trainer.sample_edges(data, train=False)
+    for idx, (G, gt_mask, y) in enumerate(zip(graphs, masks, labels)):
+        data = convert_to_hetero_data(G)
 
-        # ---------- ROC bookkeeping (all graphs, all edges) ---------------
-        authors = [n for n,d in G.nodes(data=True) if d['type']=='Author']
-        papers  = [n for n,d in G.nodes(data=True) if d['type']=='Paper']
-        for rel, probs in alph.items():
+        # ── graph-level prediction ────────────────────────────────────────
+        logits, _ = trainer.model(data.x_dict, data.edge_index_dict)
+        prob_motif = torch.softmax(logits, -1)[0, motif_class].item()
+        graph_y.append(int(y == motif_class)); graph_s.append(prob_motif)
+
+        # ── edge attentions ───────────────────────────────────────────────
+        _, alpha = trainer.sample_edges(data, train=False)
+        authors = [n for n, d in G.nodes(data=True) if d['type'] == 'Author']
+        papers  = [n for n, d in G.nodes(data=True) if d['type'] == 'Paper']
+
+        # bookkeeping for edge-level ROC
+        for rel, probs in alpha.items():
             ei   = data.edge_index_dict[rel]
-            srcL = authors if rel[0]=='author' else papers
+            srcL = authors if rel[0] == 'author' else papers
             dstL = papers
-            for i,p in enumerate(probs):
-                u,v = srcL[ei[0,i]], dstL[ei[1,i]]
-                y_true.append(int((u,v) in gt_mask or (v,u) in gt_mask))
-                y_score.append(p.item())
+            for i, p in enumerate(probs):
+                u, v = srcL[ei[0, i]], dstL[ei[1, i]]
+                edge_y.append(int((u, v) in gt_mask or (v, u) in gt_mask))
+                edge_s.append(p.item())
 
-        # ---------- Skip accuracy / fidelity if no motif in this graph ----
-        if y != motif_class or len(gt_mask) == 0:
+        # ── build sparse-top-k mask & predicted edge list ────────────────
+        pred_edges = set()
+        for rel, probs in alpha.items():
+            rtype = rel[1]; q = ratio.get(rtype, 0.0)
+            keep  = sparse_topk(probs, data.edge_index_dict[rel], ratio=q)
+            ei_k  = data.edge_index_dict[rel][:, keep]
+            srcL  = authors if rel[0] == 'author' else papers
+            dstL  = papers
+            for i in range(ei_k.size(1)):
+                pred_edges.add((srcL[ei_k[0, i]], dstL[ei_k[1, i]]))
+
+        # ── full-mask recall test ────────────────────────────────────────
+        if gt_mask and all(e in pred_edges or (e[1], e[0]) in pred_edges
+                           for e in gt_mask):
+            full_mask_covered_ids.append(idx)
+
+        # ── skip accuracy / fidelity if graph has no motif ───────────────
+        if y != motif_class or not gt_mask:
             continue
 
-        # ---------- build top‑k masks & pred edge list --------------------
-        topk_bool, pred_edges = {}, []
-        for rel, probs in alph.items():
-            rtype = rel[1]; k = top_k.get(rtype, 0)
-            m = torch.zeros_like(probs, dtype=torch.bool)
-            if k > 0 and probs.numel():
-                idxs = torch.topk(probs, k=min(k, probs.numel())).indices
-                m[idxs] = True
-                ei   = data.edge_index_dict[rel]
-                srcL = authors if rel[0]=='author' else papers
-                dstL = papers
-                for idx in idxs:
-                    pred_edges.append((srcL[ei[0,idx]], dstL[ei[1,idx]]))
-            topk_bool[rel] = m
-
-        # ---------- edge‑level accuracy -----------------------------------
+        # edge-level hit-rate (precision on kept edges)
         if pred_edges:
-            hits = sum(e in gt_mask or (e[1],e[0]) in gt_mask for e in pred_edges)
-            hits_per_graph.append(hits / len(pred_edges))
+            hit = sum(e in gt_mask or (e[1], e[0]) in gt_mask
+                      for e in pred_edges)
+            hits.append(hit / len(pred_edges))
 
-        # ---------- build drop / keep dicts for fidelity ------------------
+        # fidelity (same as before)
         drop_dict, keep_dict = {}, {}
-        for rel in rels:
+        for rel, probs in alpha.items():
+            keep = sparse_topk(probs, data.edge_index_dict[rel],
+                               ratio=ratio.get(rel[1], 0.0))
             ei = data.edge_index_dict[rel]
-            if rel in topk_bool:
-                m = ~topk_bool[rel]
-                drop_dict[rel] = ei[:, m]
-                keep_dict[rel] = ei[:, ~m] if (~m).any() else ei[:, :0]
-            else:
-                drop_dict[rel] = ei
-                keep_dict[rel] = ei[:, :0]
+            drop_dict[rel] = ei[:, ~keep]
+            keep_dict[rel] = ei[:,  keep]
             if rel[1] == 'self_loop':
-                keep_dict[rel] = ei
+                keep_dict[rel] = ei                  # always keep self loops
 
         log_full = trainer.model(data.x_dict, data.edge_index_dict)[0]
         log_drop = trainer.model(data.x_dict, drop_dict)[0]
         log_keep = trainer.model(data.x_dict, keep_dict)[0]
-        fid_pos.append((log_full.argmax() == log_drop.argmax()).item())
-        fid_neg.append((log_full.argmax() == log_keep.argmax()).item())
+        fid_pos.append(int(log_full.argmax() == log_drop.argmax()))
+        fid_neg.append(int(log_full.argmax() == log_keep.argmax()))
 
-    # ------------- aggregation -------------------------------------------
-    roc  = roc_auc_score(y_true, y_score) if len(set(y_true)) > 1 else float('nan')
+    # ── aggregate numbers ────────────────────────────────────────────────
+    from sklearn.metrics import roc_auc_score
+    edge_auc  = roc_auc_score(edge_y,  edge_s)  if len(set(edge_y))  > 1 else float('nan')
+    graph_auc = roc_auc_score(graph_y, graph_s) if len(set(graph_y)) > 1 else float('nan')
+
     return dict(
-        edge_accuracy = float(np.mean(hits_per_graph)) if hits_per_graph else float('nan'),
-        roc_auc       = roc,
-        fidelity_pos  = float(np.mean(fid_pos)) if fid_pos else float('nan'),
-        fidelity_neg  = float(np.mean(fid_neg)) if fid_neg else float('nan'),
-        per_graph_hits = hits_per_graph,
-        evaluated_graphs = len(hits_per_graph)
+        edge_accuracy   = float(np.mean(hits)) if hits else float('nan'),
+        edge_roc_auc    = edge_auc,
+        graph_roc_auc   = graph_auc,
+        fidelity_pos    = float(np.mean(fid_pos)) if fid_pos else float('nan'),
+        fidelity_neg    = float(np.mean(fid_neg)) if fid_neg else float('nan'),
+        full_mask_covered_ids = full_mask_covered_ids   # ← NEW
     )
+
+
+# def visualize_explanation_topk(graph, trainer, convert_to_hetero_data,
+#                                 mask_edges, top_k = {'writes': 2, 'cites': 4}):
+#     """
+#     Like visualize_explanation, but selects exactly `top_k` edges
+#     per relation (writes/cites), ranked by attention score.
+#     """
+#     data = convert_to_hetero_data(graph)
+#     _, alpha_dict = trainer.sample_edges(data, train=False)
+
+#     H = nx.Graph()
+#     H.add_nodes_from(graph.nodes(data=True))
+#     H.add_edges_from(graph.edges(data=True))
+#     pos = nx.spring_layout(H)
+
+#     # collect the top_k edges
+#     gsat_edges = []
+#     for rel, alpha in alpha_dict.items():
+#         if rel[1] not in {'writes','cites'}:
+#             continue
+#         scores = alpha.cpu().detach().numpy()
+#         if scores.size == 0:
+#             continue
+#         if top_k[rel[1]] == 0:
+#             continue
+
+#         # get indices of top_k scores
+#         idxs = np.argsort(scores)[::-1][:top_k[rel[1]]]
+#         ei = data.edge_index_dict[rel]
+#         authors = [n for n,d in graph.nodes(data=True) if d['type']=='Author']
+#         papers  = [n for n,d in graph.nodes(data=True) if d['type']=='Paper']
+#         src_list = authors if rel[0]=='author' else papers
+#         dst_list = papers
+
+#         for idx in idxs:
+#             u = src_list[ ei[0,idx].item() ]
+#             v = dst_list[ ei[1,idx].item() ]
+#             gsat_edges.append((u, v))
+
+#     # plot
+#     plt.figure(figsize=(6,4))
+#     authors = [n for n,d in graph.nodes(data=True) if d['type']=='Author']
+#     papers  = [n for n,d in graph.nodes(data=True) if d['type']=='Paper']
+
+#     nx.draw_networkx_nodes(H, pos, nodelist=authors,
+#                            node_color='skyblue', node_shape='o', label='Author')
+#     nx.draw_networkx_nodes(H, pos, nodelist=papers,
+#                            node_color='lightgreen', node_shape='s', label='Paper')
+#     nx.draw_networkx_labels(H, pos, font_size=8)
+#     nx.draw_networkx_edges(H, pos, edge_color='lightgrey', width=1)
+
+#     if gsat_edges:
+#         nx.draw_networkx_edges(H, pos,
+#             edgelist=gsat_edges, edge_color='red', width=2, label='GSAT top-k')
+
+#     if mask_edges:
+#         nx.draw_networkx_edges(H, pos,
+#             edgelist=mask_edges, edge_color='black',
+#             style='dashed', width=2, label='Motif (GT)')
+
+#     plt.title(f"GSAT Explanation (top {top_k} edges)")
+#     plt.legend()
+#     plt.axis('off')
+#     # plt.show()
+#     return plt.gcf()
+
+
+# from sklearn.metrics import roc_auc_score
+# import torch, numpy as np
+
+# @torch.no_grad()
+# def evaluate_explanations2(
+#         graphs, masks, labels,
+#         trainer, convert_fn,
+#         top_k={'writes':2, 'cites':4},
+#         motif_class=0                 # which label corresponds to “motif present”
+# ):
+#     hits_per_graph, fid_pos, fid_neg = [], [], []
+#     y_true, y_score                   = [], []   # <- now filled for *all* graphs
+#     rels = trainer.model.relations
+
+#     for G, gt_mask, y in zip(graphs, masks, labels):
+#         data = convert_fn(G)
+#         _, alph = trainer.sample_edges(data, train=False)
+
+#         # ---------- ROC bookkeeping (all graphs, all edges) ---------------
+#         authors = [n for n,d in G.nodes(data=True) if d['type']=='Author']
+#         papers  = [n for n,d in G.nodes(data=True) if d['type']=='Paper']
+#         for rel, probs in alph.items():
+#             ei   = data.edge_index_dict[rel]
+#             srcL = authors if rel[0]=='author' else papers
+#             dstL = papers
+#             for i,p in enumerate(probs):
+#                 u,v = srcL[ei[0,i]], dstL[ei[1,i]]
+#                 y_true.append(int((u,v) in gt_mask or (v,u) in gt_mask))
+#                 y_score.append(p.item())
+
+#         # ---------- Skip accuracy / fidelity if no motif in this graph ----
+#         if y != motif_class or len(gt_mask) == 0:
+#             continue
+
+#         # ---------- build top‑k masks & pred edge list --------------------
+#         topk_bool, pred_edges = {}, []
+#         for rel, probs in alph.items():
+#             rtype = rel[1]; k = top_k.get(rtype, 0)
+#             m = torch.zeros_like(probs, dtype=torch.bool)
+#             if k > 0 and probs.numel():
+#                 idxs = torch.topk(probs, k=min(k, probs.numel())).indices
+#                 m[idxs] = True
+#                 ei   = data.edge_index_dict[rel]
+#                 srcL = authors if rel[0]=='author' else papers
+#                 dstL = papers
+#                 for idx in idxs:
+#                     pred_edges.append((srcL[ei[0,idx]], dstL[ei[1,idx]]))
+#             topk_bool[rel] = m
+
+#         # ---------- edge‑level accuracy -----------------------------------
+#         if pred_edges:
+#             hits = sum(e in gt_mask or (e[1],e[0]) in gt_mask for e in pred_edges)
+#             hits_per_graph.append(hits / len(pred_edges))
+
+#         # ---------- build drop / keep dicts for fidelity ------------------
+#         drop_dict, keep_dict = {}, {}
+#         for rel in rels:
+#             ei = data.edge_index_dict[rel]
+#             if rel in topk_bool:
+#                 m = ~topk_bool[rel]
+#                 drop_dict[rel] = ei[:, m]
+#                 keep_dict[rel] = ei[:, ~m] if (~m).any() else ei[:, :0]
+#             else:
+#                 drop_dict[rel] = ei
+#                 keep_dict[rel] = ei[:, :0]
+#             if rel[1] == 'self_loop':
+#                 keep_dict[rel] = ei
+
+#         log_full = trainer.model(data.x_dict, data.edge_index_dict)[0]
+#         log_drop = trainer.model(data.x_dict, drop_dict)[0]
+#         log_keep = trainer.model(data.x_dict, keep_dict)[0]
+#         fid_pos.append((log_full.argmax() == log_drop.argmax()).item())
+#         fid_neg.append((log_full.argmax() == log_keep.argmax()).item())
+
+#     # ------------- aggregation -------------------------------------------
+#     roc  = roc_auc_score(y_true, y_score) if len(set(y_true)) > 1 else float('nan')
+#     return dict(
+#         edge_accuracy = float(np.mean(hits_per_graph)) if hits_per_graph else float('nan'),
+#         roc_auc       = roc,
+#         fidelity_pos  = float(np.mean(fid_pos)) if fid_pos else float('nan'),
+#         fidelity_neg  = float(np.mean(fid_neg)) if fid_neg else float('nan'),
+#         per_graph_hits = hits_per_graph,
+#         evaluated_graphs = len(hits_per_graph)
+#     )
 
 
 
@@ -495,7 +674,7 @@ if __name__ == "__main__":
             graphs, masks, labels, trainer, convert_to_hetero_data,
             top_k=top_k, motif_class = 0) 
 
-    for k, v in metrics.items():
+    for k, v in metrics.items(): 
         if isinstance(v, list):
             print(f"{k}: mean={np.mean(v):.3f}, per‑graph={v}")
         else:
