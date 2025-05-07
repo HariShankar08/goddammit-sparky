@@ -28,22 +28,6 @@ commands=(
 "PNA ba_2motifs GMT-sam 'python run_gmt.py --dataset ba_2motifs --backbone PNA --cuda 0 -fs 1 -mt 5 -st 20 -ie 0.1 -r 0.5 -sm'"
 "PNA ba_2motifs GMT-sam 'python run_gmt.py --dataset ba_2motifs --backbone PNA --cuda 0 -fs 1 -gmt 5 -st 20 -ie 0.1 -r 0.5 -fm -mt 5669'"
 
-"GIN mutag GMT-lin 'python run_gmt.py --dataset mutag --backbone GIN --cuda 0 -fs 1 -mt 3 -ie 0.1'"
-"GIN mutag GMT-sam 'python run_gmt.py --dataset mutag --backbone GIN --cuda 0 -fs 1 -mt 5 -st 100 -ie 0.1 -sm'"
-"GIN mutag GMT-sam 'python run_gmt.py --dataset mutag --backbone GIN --cuda 0 -fs 1 -gmt 5 -st 100 -ie 0.1 -fm -mt 5550'"
-
-"PNA mutag GMT-lin 'python run_gmt.py --dataset mutag --backbone PNA --cuda 0 -fs 1 -mt 3 -ie 0.5'"
-"PNA mutag GMT-sam 'python run_gmt.py --dataset mutag --backbone PNA --cuda 0 -fs 1 -mt 5 -st 1 -ie 0.5 -r 0.6 -sm'"
-"PNA mutag GMT-sam 'python run_gmt.py --dataset mutag --backbone PNA --cuda 0 -fs 1 -gmt 5 -st 1 -ie 0.5 -r 0.6 -fm -mt 5559'"
-
-"GIN mnist GMT-lin 'python run_gmt.py --dataset mnist --backbone GIN --cuda 0 -fs 1 -mt 3 -ie 1'"
-"GIN mnist GMT-sam 'python run_gmt.py --dataset mnist --backbone GIN --cuda 0 -fs 1 -mt 8 -st 100 -ie 0.1 -sm'"
-"GIN mnist GMT-sam 'python run_gmt.py --dataset mnist --backbone GIN --cuda 0 -fs 1 -gmt 8 -st 100 -ie 0.1 -fm -mt 5550'"
-
-"PNA mnist GMT-lin 'python run_gmt.py --dataset mnist --backbone PNA --cuda 0 -fs 1 -mt 3 -ie 1'"
-"PNA mnist GMT-sam 'python run_gmt.py --dataset mnist --backbone PNA --cuda 0 -fs 1 -mt 5 -st 1 -ie 0.1 -r 0.8 -sm'"
-"PNA mnist GMT-sam 'python run_gmt.py --dataset mnist --backbone PNA --cuda 0 -fs 1 -gmt 5 -st 1 -ie 0.1 -r 0.8 -fm -mt 5552'"
-
 "GIN spmotif_0.7 GMT-lin 'python run_gmt.py --dataset spmotif_0.7 --backbone GIN --cuda 0 -fs 1 -mt 3 -ie 0.5'"
 "GIN spmotif_0.7 GMT-sam 'python run_gmt.py --dataset spmotif_0.7 --backbone GIN --cuda 0 -fs 1 -mt 5 -di 10 -st 80 -ie 0.5 -sm'"
 "GIN spmotif_0.7 GMT-sam 'python run_gmt.py --dataset spmotif_0.7 --backbone GIN --cuda 0 -fs 1 -gmt 5 -di 10 -st 80 -ie 0.5 -mt 5550 -sr 0.8'"
