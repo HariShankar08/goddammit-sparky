@@ -28,14 +28,14 @@ commands=(
 "PNA ba_2motifs GMT-sam 'python run_gmt.py --dataset ba_2motifs --backbone PNA --cuda 0 -fs 1 -mt 5 -st 20 -ie 0.1 -r 0.5 -sm'"
 "PNA ba_2motifs GMT-sam 'python run_gmt.py --dataset ba_2motifs --backbone PNA --cuda 0 -fs 1 -gmt 5 -st 20 -ie 0.1 -r 0.5 -fm -mt 5669'"
 
-"GIN spmotif_0.7 GMT-lin 'python run_gmt.py --dataset spmotif_0.7 --backbone GIN --cuda 0 -fs 1 -mt 3 -ie 0.5'"
-"GIN spmotif_0.7 GMT-sam 'python run_gmt.py --dataset spmotif_0.7 --backbone GIN --cuda 0 -fs 1 -mt 5 -di 10 -st 80 -ie 0.5 -sm'"
-"GIN spmotif_0.7 GMT-sam 'python run_gmt.py --dataset spmotif_0.7 --backbone GIN --cuda 0 -fs 1 -gmt 5 -di 10 -st 80 -ie 0.5 -mt 5550 -sr 0.8'"
-
+"GIN spmotif_0.5 GMT-lin 'python run_gmt.py --dataset spmotif_0.5 --backbone GIN --cuda 0 -fs 1 -mt 3 -ie 0.5'"
+"GIN spmotif_0.5 GMT-sam 'python run_gmt.py --dataset spmotif_0.5 --backbone GIN --cuda 0 -fs 1 -mt 5 -di 10 -st 80 -ie 0.5 -sm'"
+"GIN spmotif_0.5 GMT-sam 'python run_gmt.py --dataset spmotif_0.5 --backbone GIN --cuda 0 -fs 1 -gmt 5 -di 10 -st 80 -ie 0.5 -mt 5550 -sr 0.8'"
 "PNA spmotif_0.5 GMT-lin 'python run_gmt.py --dataset spmotif_0.5 --backbone PNA --cuda 0 -fs 1 -mt 3 -ie 1'"
 "PNA spmotif_0.5 GMT-sam 'python run_gmt.py --dataset spmotif_0.5 --backbone PNA --cuda 0 -fs 1 -mt 5 -di -1 -st 80 -ie 1 -sm'"
 "PNA spmotif_0.5 GMT-sam 'python run_gmt.py --dataset spmotif_0.5 --backbone PNA --cuda 0 -fs 1 -gmt 5 -di -1 -st 80 -ie 1 -mt 5552 -sr 0.3'"
 
+"GIN spmotif_0.7 GMT-lin 'python run_gmt.py --dataset spmotif_0.7 --backbone GIN --cuda 0 -fs 1 -mt 3 -ie 0.5'"
 "GIN spmotif_0.7 GMT-sam 'python run_gmt.py --dataset spmotif_0.7 --backbone GIN --cuda 0 -fs 1 -mt 5 -di 20 -st 200 -ie 0.1 -sm'"
 "GIN spmotif_0.7 GMT-sam 'python run_gmt.py --dataset spmotif_0.7 --backbone GIN --cuda 0 -fs 1 -gmt 5 -di 20 -st 200 -ie 0.1 -fm -mt 5550 -sr 0.7'"
 "PNA spmotif_0.7 GMT-lin 'python run_gmt.py --dataset spmotif_0.7 --backbone PNA --cuda 0 -fs 1 -mt 3 -ie 1'"
@@ -45,7 +45,6 @@ commands=(
 "GIN spmotif_0.9 GMT-lin 'python run_gmt.py --dataset spmotif_0.9 --backbone GIN --cuda 0 -fs 1 -mt 3 -ie 0.5'"
 "GIN spmotif_0.9 GMT-sam 'python run_gmt.py --dataset spmotif_0.9 --backbone GIN --cuda 0 -fs 1 -mt 5 -di 20 -st 200 -ie 0.1 -sm'"
 "GIN spmotif_0.9 GMT-sam 'python run_gmt.py --dataset spmotif_0.9 --backbone GIN --cuda 0 -fs 1 -gmt 5 -di 20 -st 200 -ie 0.1 -fm -mt 5550 -sr 0.5'"
-
 "PNA spmotif_0.9 GMT-lin 'python run_gmt.py --dataset spmotif_0.9 --backbone PNA --cuda 0 -fs 1 -mt 3 -ie 1'"
 "PNA spmotif_0.9 GMT-sam 'python run_gmt.py --dataset spmotif_0.9 --backbone PNA --cuda 0 -fs 1 -mt 5 -di -1 -st 80 -ie 1 -sm'"
 "PNA spmotif_0.9 GMT-sam 'python run_gmt.py --dataset spmotif_0.9 --backbone PNA --cuda 0 -fs 1 -gmt 5 -di -1 -st 80 -ie 1 -mt 5552 -sr 0.3'"
@@ -53,7 +52,6 @@ commands=(
 "GIN ogbg_molhiv GMT-lin 'python run_gmt.py --dataset ogbg_molhiv --backbone GIN --cuda 0 -fs 1 -mt 3 -ie 1'"
 "GIN ogbg_molhiv GMT-sam 'python run_gmt.py --dataset ogbg_molhiv --backbone GIN --cuda 0 -fs 1 -mt 5 -di 20 -st 100 -ie 0.1 -sm'"
 "GIN ogbg_molhiv GMT-sam 'python run_gmt.py --dataset ogbg_molhiv --backbone GIN --cuda 0 -fs 1 -gmt 5 -di 20 -st 100 -ie 0.1 -fm -mt 5552'"
-
 "PNA ogbg_molhiv GMT-lin 'python run_gmt.py --dataset ogbg_molhiv --backbone PNA --cuda 0 -fs 1 -mt 3 -ie 1'"
 "PNA ogbg_molhiv GMT-sam 'python run_gmt.py --dataset ogbg_molhiv --backbone PNA --cuda 0 -fs 1 -mt 5 -di 10 -st 100 -ie 0.5 -sm'"
 "PNA ogbg_molhiv GMT-sam 'python run_gmt.py --dataset ogbg_molhiv --backbone PNA --cuda 0 -fs 1 -gmt 5 -di 10 -st 100 -ie 0.5 -fm -mt 5449'"
