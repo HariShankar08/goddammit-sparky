@@ -5,7 +5,7 @@ from torch_geometric.utils import degree
 from torch_geometric.loader import DataLoader
 
 from ogb.graphproppred import PygGraphPropPredDataset
-from datasets import SynGraphDataset, Mutag, SPMotif, MNIST75sp, graph_sst2, AMiner
+from datasets import SynGraphDataset, Mutag, SPMotif, MNIST75sp, graph_sst2
 
 
 def get_data_loaders(data_dir, dataset_name, batch_size, splits, random_state, mutag_x=False):
