@@ -314,6 +314,66 @@ class GSAT(nn.Module):
         loss = self.criterion(clf_logits, data.y)
         return loss
 
+    def train_self(self, loaders, test_set, metric_dict, use_edge_attr):
+        viz_set = self.get_viz_idx(test_set, self.dataset_name)
+        for epoch in range(self.epochs):
+            if self.multi_linear==5775:
+                valid_res = self.run_one_epoch(loaders['valid'], epoch, 'test', use_edge_attr)
+                print(f"validation: att_auroc {valid_res[0]}, precision {valid_res[1]}, clf_acc {valid_res[2]}, clf_roc {valid_res[3]}")
+                train_res = test_res = self.run_one_epoch(loaders['test'], epoch, 'test', use_edge_attr)
+                print(f"test: att_auroc {test_res[0]}, precision {test_res[1]}, clf_acc {test_res[2]}, clf_roc {test_res[3]}")
+            else:
+                train_res = self.run_one_epoch(loaders['train'], epoch, 'train', use_edge_attr)
+                valid_res = self.run_one_epoch(loaders['valid'], epoch, 'val', use_edge_attr)
+                test_res = self.run_one_epoch(loaders['test'], epoch, 'test', use_edge_attr)
+            self.writer.add_scalar('xgnn_train/lr', get_lr(self.optimizer), epoch)
+
+            assert len(train_res) == 6
+            main_metric_idx = 3 if 'ogb' in self.dataset_name else 2  # clf_roc or clf_acc
+            if self.scheduler is not None:
+                self.scheduler.step(valid_res[main_metric_idx])
+
+            r = self.fix_r if self.fix_r else self.get_r(self.decay_interval, self.decay_r, epoch, final_r=self.final_r, init_r=self.init_r)
+            if (r == self.final_r or self.fix_r)  and ((valid_res[main_metric_idx] > metric_dict['metric/best_clf_valid'])
+                                                                     or (valid_res[main_metric_idx] == metric_dict['metric/best_clf_valid']
+                                                                         and valid_res[4] < metric_dict['metric/best_clf_valid_loss'])):
+
+                metric_dict = {'metric/best_clf_epoch': epoch, 'metric/best_clf_valid_loss': valid_res[4],
+                               'metric/best_clf_train': train_res[main_metric_idx], 'metric/best_clf_valid': valid_res[main_metric_idx], 'metric/best_clf_test': test_res[main_metric_idx],
+                               'metric/best_x_roc_train': train_res[0], 'metric/best_x_roc_valid': valid_res[0], 'metric/best_x_roc_test': test_res[0],
+                               'metric/best_x_precision_train': train_res[1], 'metric/best_x_precision_valid': valid_res[1], 'metric/best_x_precision_test': test_res[1],
+                               'metric/best_tvd_train':train_res[5],'metric/best_tvd_valid':valid_res[5],'metric/best_tvd_test':test_res[5],}
+                if self.save_mcmc:
+                    # mcmc_dir = Path("/".join(str(self.model_dir).split("/")[:3]))
+                    save_checkpoint(self.clf, self.mcmc_dir, model_name=self.pre_model_name+f"_clf_mcmc")
+                    save_checkpoint(self.extractor, self.mcmc_dir, model_name=self.pre_model_name+f"_att_mcmc")
+                # save_checkpoint(self.clf, self.model_dir, model_name='xgnn_clf_epoch_' + str(epoch))
+                # save_checkpoint(self.extractor, self.model_dir, model_name='xgnn_att_epoch_' + str(epoch))
+
+            for metric, value in metric_dict.items():
+                metric = metric.split('/')[-1]
+                self.writer.add_scalar(f'xgnn_best/{metric}', value, epoch)
+
+            if self.num_viz_samples != 0 and (epoch % self.viz_interval == 0 or epoch == self.epochs - 1):
+                if self.multi_label:
+                    raise NotImplementedError
+                for idx, tag in viz_set:
+                    try:
+                        self.visualize_results(test_set, idx, epoch, tag, use_edge_attr)
+                    except Exception as e:
+                        print(e)
+
+            # if epoch == self.epochs - 1:
+            #     save_checkpoint(self.clf, self.model_dir, model_name='xgnn_clf_epoch_' + str(epoch))
+            #     save_checkpoint(self.extractor, self.model_dir, model_name='xgnn_att_epoch_' + str(epoch))
+
+            print(f'[Seed {self.random_state}, Epoch: {epoch}]: Best Epoch: {metric_dict["metric/best_clf_epoch"]}, '
+                  f'Best Val Pred ACC/ROC: {metric_dict["metric/best_clf_valid"]:.3f}, Best Test Pred ACC/ROC: {metric_dict["metric/best_clf_test"]:.3f}, '
+                  f'Best Test X AUROC: {metric_dict["metric/best_x_roc_test"]:.3f}, Best Test Logits TVD: {metric_dict["metric/best_tvd_test"]:.3f}')
+            print('====================================')
+            print('====================================')
+        return metric_dict
+
     def train_self_meta(self, loaders, test_set, metric_dict, use_edge_attr, inner_steps=3, adapt_steps=3, alpha=0.01, beta=0.001, meta_batch_size=1, hops=1):
         """
         Meta-learning training loop:
