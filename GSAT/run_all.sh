@@ -1,20 +1,24 @@
 #!/bin/bash
 
 # Function to run commands with and without --meta
+
+# log_prefix="logs/${backbone}_${dataset}_${mode}"
+mkdir -p logs
+
 run_command() {
     local backbone=$1
     local dataset=$2
     local mode=$3
     local cmd=$4
-
+    local log_prefix="logs/${backbone}_${dataset}_${mode}"
     # Normal GMT
     echo "Running $mode with backbone: $backbone on dataset: $dataset"
-    eval "$cmd"
+    eval "$cmd" > "${log_prefix}.out" 2> "${log_prefix}.err"
     echo
 
     # Meta GMT
     echo "Running Meta$mode with backbone: $backbone on dataset: $dataset"
-    eval "$cmd --meta"
+    eval "$cmd --meta" > "${log_prefix}_meta.out" 2> "${log_prefix}_meta.err"
     echo
 }
 
@@ -33,14 +37,6 @@ commands=(
 "PNA mutag GMT-lin 'python run_gmt.py --dataset mutag --backbone PNA --cuda 0 -fs 1 -mt 3 -ie 0.5'"
 "PNA mutag GMT-sam 'python run_gmt.py --dataset mutag --backbone PNA --cuda 0 -fs 1 -mt 5 -st 1 -ie 0.5 -r 0.6 -sm'"
 "PNA mutag GMT-sam 'python run_gmt.py --dataset mutag --backbone PNA --cuda 0 -fs 1 -gmt 5 -st 1 -ie 0.5 -r 0.6 -fm -mt 5559'"
-
-"GIN mnist GMT-lin 'python run_gmt.py --dataset mnist --backbone GIN --cuda 0 -fs 1 -mt 3 -ie 1'"
-"GIN mnist GMT-sam 'python run_gmt.py --dataset mnist --backbone GIN --cuda 0 -fs 1 -mt 8 -st 100 -ie 0.1 -sm'"
-"GIN mnist GMT-sam 'python run_gmt.py --dataset mnist --backbone GIN --cuda 0 -fs 1 -gmt 8 -st 100 -ie 0.1 -fm -mt 5550'"
-
-"PNA mnist GMT-lin 'python run_gmt.py --dataset mnist --backbone PNA --cuda 0 -fs 1 -mt 3 -ie 1'"
-"PNA mnist GMT-sam 'python run_gmt.py --dataset mnist --backbone PNA --cuda 0 -fs 1 -mt 5 -st 1 -ie 0.1 -r 0.8 -sm'"
-"PNA mnist GMT-sam 'python run_gmt.py --dataset mnist --backbone PNA --cuda 0 -fs 1 -gmt 5 -st 1 -ie 0.1 -r 0.8 -fm -mt 5552'"
 
 "GIN spmotif_0.5 GMT-lin 'python run_gmt.py --dataset spmotif_0.5 --backbone GIN --cuda 0 -fs 1 -mt 3 -ie 0.5'"
 "GIN spmotif_0.5 GMT-sam 'python run_gmt.py --dataset spmotif_0.5 --backbone GIN --cuda 0 -fs 1 -mt 5 -di 10 -st 80 -ie 0.5 -sm'"
