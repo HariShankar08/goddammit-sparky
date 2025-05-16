@@ -13,6 +13,9 @@ pip install -r requirements.txt
 
 # Downgrade protobuf - IMPORTANT.
 pip install --upgrade --force-reinstall protobuf==3.20.*
+
+# also install higher
+pip install higher
 ```
 
 ***Important: After the change the data_dir in `GSAT/configs/global_config.yml`***
