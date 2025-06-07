@@ -1,4 +1,4 @@
-SpMotif-0.7 Logs linked here: [Google Drive](https://drive.google.com/drive/folders/1fPsHZWV-GeazKkiC1md2W-dk81UAGXBr?usp=sharing)
+SpMotif-0.7 Logs and Results added as zip file.
 
 ## Preparation
 
